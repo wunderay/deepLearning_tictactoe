@@ -119,7 +119,9 @@ class State:
                     actions.append(action)
                     self.player1.add_State(self.board)
                     current_state = self.board
-                    if action not in self.availablePositions():
+                    try:
+                        self.availablePositions().index(action)
+                    except ValueError:
                         self.player1.feed_Reward(-2)
                     else:
                         self.updateState(action)
@@ -129,7 +131,9 @@ class State:
                     actions.append(action)
                     self.player2.add_State(self.board)
                     current_state = self.board
-                    if action not in self.availablePositions():
+                    try:
+                        self.availablePositions().index(action)
+                    except ValueError:
                         self.player2.feed_Reward(-2)
                     else:
                         self.updateState(action)
@@ -233,7 +237,7 @@ class Player:
         self.model.add(layers.BatchNormalization())
         self.model.add(layers.Flatten())
         self.model.add(Dense(num_actions))
-        self.model.compile(loss="BinaryCrossentropy",
+        self.model.compile(loss="MeanSquaredError",
                            optimizer=Adam(learning_rate=self.lr))
         self.model.summary()
         return self.model
@@ -268,19 +272,20 @@ class Player:
 
         self.rewards = np.array(self.rewards)
         self.rewards = [np.asarray(reward) for reward in self.rewards]
-        # Troubleshooting
-        if len(state_list) > len(self.rewards):
-                print("Statelist")
-        elif len(state_list) < len(self.rewards):
-            print("rewards")
         targets = []
         index = 0
         for state in state_list:
             targets.append(self.rewards[index] + self.decay_gamma * np.amax(self.model.predict(state), axis=1))
             index += 1
         targets = np.asarray(targets)
+        index = 0
         for target, state in zip(targets, state_list):
-            self.model.fit(state, target)    # something about this throws an out of bounds index error
+            self.model.fit(state, target)
+            if index > 9:
+                break
+            index +=1
+        targets = None
+        state_list = None
 
     # additional hashstate
     def add_State(self, state):
@@ -341,22 +346,22 @@ if __name__ == "__main__":
 
     # train the NN
 
-    P1 = Player("P1")
-
-    P2 = Player("P2")
-
-    cs = State(P1, P2)
-
-    print("Training the Neural Network...")
-
-    play1, play2 = cs.train()
-    play1.save_model("player1")
-    play2.save_model("player2")
+    # P1 = Player("P1")
+    #
+    # P2 = Player("P2")
+    #
+    # cs = State(P1, P2)
+    #
+    # print("Training the Neural Network...")
+    #
+    # play1, play2 = cs.train()
+    # play1.save_model("player1")
+    # play2.save_model("player2")
 
     # Play against a human
     P1 = Player("Computer Player", exp_rate=0)
 
-    P1.load_model("policy_P1")
+    P1.load_model("player1")
 
     P2 = HumanPlayer("Human")
 
