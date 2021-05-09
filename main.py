@@ -109,7 +109,7 @@ class State:
         self.playerSymbol = 1
 
     def train(self):
-        epoch = 100
+        epoch = 40
         for episode in range(epoch):
             print("Epoch {} / {}".format(episode, epoch))
             actions = []
@@ -161,7 +161,7 @@ class State:
             win = self.winner()
             if win is not None:
                 if win == 1:
-                    print(self.p1.name, "It's a win!")
+                    print(self.player1.name, "It's a win!")
                 else:
                     print("It's a tie!")
                 self.reset()
@@ -177,11 +177,12 @@ class State:
                 win = self.winner()
                 if win is not None:
                     if win == -1:
-                        print(self.p2.name, "It's a win!")
+                        print(self.player2.name, "It's a win!")
                     else:
                         print("It's a tie!")
                     self.reset()
                     break
+            print()
 
 
 from tensorflow.keras import *
@@ -239,7 +240,6 @@ class Player:
         self.model.add(Dense(num_actions))
         self.model.compile(loss="MeanSquaredError",
                            optimizer=Adam(learning_rate=self.lr))
-        self.model.summary()
         return self.model
 
     def make_Move(self, positions, current_board, symbol):
@@ -329,6 +329,8 @@ class HumanPlayer:
             action = (row, col)
             if action in positions:
                 return action
+            else:
+                print("Invalid move\n")
 
     # append a hash state
     def add_State(self, state):
@@ -355,13 +357,13 @@ if __name__ == "__main__":
     # print("Training the Neural Network...")
     #
     # play1, play2 = cs.train()
-    # play1.save_model("player1")
-    # play2.save_model("player2")
+    # play1.save_model("player1_v2")
+    # play2.save_model("player2_v2")
 
     # Play against a human
     P1 = Player("Computer Player", exp_rate=0)
 
-    P1.load_model("player1")
+    P1.load_model("player1_v2")
 
     P2 = HumanPlayer("Human")
 
