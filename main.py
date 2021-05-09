@@ -153,7 +153,7 @@ class State:
         while not self.isEnd:
             # Player_1
             positions = self.availablePositions()
-            p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
+            p1_action = self.player1.make_Move(positions, self.board, self.playerSymbol)
             # take action and upate board state
             self.updateState(p1_action)
             # self.showBoard() --------------------------------Fernando needs to do GUI for this portion
@@ -170,7 +170,7 @@ class State:
             else:
                 # Player_2
                 positions = self.availablePositions()
-                p2_action = self.p2.chooseAction(positions)
+                p2_action = self.player2.make_Move(positions)
 
                 self.updateState(p2_action)
                 # self.showBoard() --------------------------------Fernando needs to do GUI for this portion
