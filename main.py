@@ -109,9 +109,9 @@ class State:
         self.playerSymbol = 1
 
     def train(self):
-        epoch = 40
+        epoch = 50
         for episode in range(epoch):
-            print("Epoch {} / {}".format(episode, epoch))
+            print("Epoch {} / {}".format(episode + 1, epoch))
             actions = []
             while not self.isEnd:
                 if self.playerSymbol > 0:
@@ -154,10 +154,11 @@ class State:
             # Player_1
             positions = self.availablePositions()
             p1_action = self.player1.make_Move(positions, self.board, self.playerSymbol)
-            # take action and upate board state
+            # take action and update board state
             self.updateState(p1_action)
             # self.showBoard() --------------------------------Fernando needs to do GUI for this portion
             # check board status if it is end
+            print(self.board)
             win = self.winner()
             if win is not None:
                 if win == 1:
@@ -183,6 +184,7 @@ class State:
                     self.reset()
                     break
             print()
+            print(self.board)
 
 
 from tensorflow.keras import *
@@ -234,7 +236,7 @@ class Player:
         # FIX MODEL
         self.model = Sequential()
         self.model.add(layers.InputLayer(input_shape=(3, 3, 1)))
-        self.model.add(Conv2D(12, (2, 2), activation='relu'))
+        self.model.add(Conv2D(64, (2, 2), activation='relu'))
         self.model.add(layers.BatchNormalization())
         self.model.add(layers.Flatten())
         self.model.add(Dense(num_actions))
@@ -347,7 +349,7 @@ class HumanPlayer:
 if __name__ == "__main__":
 
     # train the NN
-
+    #
     # P1 = Player("P1")
     #
     # P2 = Player("P2")
@@ -357,13 +359,13 @@ if __name__ == "__main__":
     # print("Training the Neural Network...")
     #
     # play1, play2 = cs.train()
-    # play1.save_model("player1_v2")
-    # play2.save_model("player2_v2")
+    # play1.save_model("player1_v4")
+    # play2.save_model("player2_v4")
 
     # Play against a human
     P1 = Player("Computer Player", exp_rate=0)
 
-    P1.load_model("player1_v2")
+    P1.load_model("player1_v4")
 
     P2 = HumanPlayer("Human")
 
