@@ -9,6 +9,7 @@ import numpy as np
 import pickle
 from tkinter import *
 from tkinter import messagebox
+import sys
 
 root = Tk()
 root.title('Tic-Tac-Toe - Deep Learning')
@@ -91,9 +92,18 @@ class State:
         return positions
 
     def updateState(self, position):
-        self.board[position] = self.playerSymbol
-        # switch to another player
-        self.playerSymbol = -1 if self.playerSymbol == 1 else 1
+        try:
+            self.board[position] = self.playerSymbol
+            # switch to another player
+            self.playerSymbol = -1 if self.playerSymbol == 1 else 1
+        except:
+            print("AI Error: {}".format(sys.exc_info()[0]))
+            messagebox.showerror(
+                "Tic-Tac-Toe", "AI Error\n{}".format(sys.exc_info()[0]))
+            quit()
+        # self.board[position] = self.playerSymbol
+        # # switch to another player
+        # self.playerSymbol = -1 if self.playerSymbol == 1 else 1
 
     # The game end !!
     def giveReward(self):
@@ -187,38 +197,14 @@ class State:
         elif(action == "(2, 2)"):
             s9["text"] = "X"
 
-    def humanTakeTurnGUI(self, square):
+    def humanTakeTurnGUI(self, square, row, column):
         global hasTakenTurn, humanAction
 
         if(square["text"] == " "):
             square["text"] = "O"
-            if(str(square) == ".!button"):
-                hasTakenTurn = True
-                humanAction = (0, 0)
-            elif(str(square) == ".!button2"):
-                hasTakenTurn = True
-                humanAction = (0, 1)
-            elif(str(square) == ".!button3"):
-                hasTakenTurn = True
-                humanAction = (0, 2)
-            elif(str(square) == ".!button4"):
-                hasTakenTurn = True
-                humanAction = (1, 0)
-            elif(str(square) == ".!button5"):
-                hasTakenTurn = True
-                humanAction = (1, 1)
-            elif(str(square) == ".!button6"):
-                hasTakenTurn = True
-                humanAction = (1, 2)
-            elif(str(square) == ".!button7"):
-                hasTakenTurn = True
-                humanAction = (2, 0)
-            elif(str(square) == ".!button8"):
-                hasTakenTurn = True
-                humanAction = (2, 1)
-            elif(str(square) == ".!button9"):
-                hasTakenTurn = True
-                humanAction = (2, 2)
+
+            hasTakenTurn = True
+            humanAction = (row, column)
         else:
             messagebox.showerror("Tic-Tac-Toe", "Square unavailable")
 
@@ -291,29 +277,40 @@ class State:
             s5.config(bg="gold")
             s7.config(bg="gold")
 
+    def resetGUI(self):
+        s1["text"] = " "
+        s2["text"] = " "
+        s3["text"] = " "
+        s4["text"] = " "
+        s5["text"] = " "
+        s6["text"] = " "
+        s7["text"] = " "
+        s8["text"] = " "
+        s9["text"] = " "
+
     def showBoard(self):
         global s1, s2, s3, s4, s5, s6, s7, s8, s9
         global turnToggle, count
         turnToggle = True
         count = 0
         s1 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s1))
+                    bg="SystemButtonFace", command=lambda row=0, column=0: cs.humanTakeTurnGUI(s1, row, column))
         s2 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s2))
+                    bg="SystemButtonFace", command=lambda row=0, column=1: cs.humanTakeTurnGUI(s2, row, column))
         s3 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s3))
+                    bg="SystemButtonFace", command=lambda row=0, column=2: cs.humanTakeTurnGUI(s3, row, column))
         s4 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s4))
+                    bg="SystemButtonFace", command=lambda row=1, column=0: cs.humanTakeTurnGUI(s4, row, column))
         s5 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s5))
+                    bg="SystemButtonFace", command=lambda row=1, column=1: cs.humanTakeTurnGUI(s5, row, column))
         s6 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s6))
+                    bg="SystemButtonFace", command=lambda row=1, column=2: cs.humanTakeTurnGUI(s6, row, column))
         s7 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s7))
+                    bg="SystemButtonFace", command=lambda row=2, column=0: cs.humanTakeTurnGUI(s7, row, column))
         s8 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s8))
+                    bg="SystemButtonFace", command=lambda row=2, column=1: cs.humanTakeTurnGUI(s8, row, column))
         s9 = Button(root, text=" ", height=10, width=20,
-                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s9))
+                    bg="SystemButtonFace", command=lambda row=2, column=2: cs.humanTakeTurnGUI(s9, row, column))
 
         # Plot squares to screen
         s1.grid(row=0, column=0)
@@ -330,6 +327,7 @@ class State:
     def playWithHuman(self):
         global hasTakenTurn, humanAction
         cs.showBoard()
+        # cs.resetGUI()
         while not self.isEnd:
             # Player_1
             positions = self.availablePositions()
@@ -350,6 +348,7 @@ class State:
                     print("It's a tie!")
                     messagebox.showinfo("Tic-Tac-Toe", "Tie!")
                 self.reset()
+                self.playWithHuman()
                 break
 
             else:
@@ -380,6 +379,7 @@ class State:
                         print("It's a tie!")
                         messagebox.showinfo("Tic-Tac-Toe", "Tie!")
                     self.reset()
+                    self.playWithHuman()
                     break
             print()
             print(self.board)
