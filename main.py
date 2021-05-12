@@ -1,11 +1,25 @@
 # State setting of the board and players
 
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import *
+import tensorflow as tf
+from tensorflow.keras.models import *
+from tensorflow.keras import *
 import numpy as np
 import pickle
+from tkinter import *
+from tkinter import messagebox
+
+root = Tk()
+root.title('Tic-Tac-Toe - Deep Learning')
+root.resizable(False, False)
 
 BOARD_ROWS = 3
 BOARD_COLS = 3
 num_actions = 9
+
+hasTakenTurn = False
+humanAction = None
 
 
 class State:
@@ -46,7 +60,8 @@ class State:
 
         # checking diagonal
         diag_sum1_l_to_r = sum([self.board[i, i] for i in range(BOARD_COLS)])
-        diag_sum2_r_to_l = sum([self.board[i, BOARD_COLS - i - 1] for i in range(BOARD_COLS)])
+        diag_sum2_r_to_l = sum([self.board[i, BOARD_COLS - i - 1]
+                                for i in range(BOARD_COLS)])
         diag_sum = max(abs(diag_sum1_l_to_r), abs(diag_sum2_r_to_l))
         if diag_sum == 3:
             self.isEnd = True
@@ -115,7 +130,8 @@ class State:
             actions = []
             while not self.isEnd:
                 if self.playerSymbol > 0:
-                    action = self.player1.make_Move(self.availablePositions(), self.board, self.playerSymbol)
+                    action = self.player1.make_Move(
+                        self.availablePositions(), self.board, self.playerSymbol)
                     actions.append(action)
                     self.player1.add_State(self.board)
                     current_state = self.board
@@ -127,7 +143,8 @@ class State:
                         self.updateState(action)
                     next_state = self.board
                 else:
-                    action = self.player2.make_Move(self.availablePositions(), self.board, self.playerSymbol)
+                    action = self.player2.make_Move(
+                        self.availablePositions(), self.board, self.playerSymbol)
                     actions.append(action)
                     self.player2.add_State(self.board)
                     current_state = self.board
@@ -138,7 +155,7 @@ class State:
                     else:
                         self.updateState(action)
                     next_state = self.board
-                if len(self.availablePositions()) ==0:
+                if len(self.availablePositions()) == 0:
                     self.isEnd = True
             self.giveReward()
             self.reset()
@@ -148,50 +165,224 @@ class State:
             self.player2.reset()
         return self.player1, self.player2
 
+    def AIUpdateGUI(self, action):
+        action = str(action)
+
+        if(action == "(0, 0)"):
+            s1["text"] = "X"
+        elif(action == "(0, 1)"):
+            s2["text"] = "X"
+        elif(action == "(0, 2)"):
+            s3["text"] = "X"
+        elif(action == "(1, 0)"):
+            s4["text"] = "X"
+        elif(action == "(1, 1)"):
+            s5["text"] = "X"
+        elif(action == "(1, 2)"):
+            s6["text"] = "X"
+        elif(action == "(2, 0)"):
+            s7["text"] = "X"
+        elif(action == "(2, 1)"):
+            s8["text"] = "X"
+        elif(action == "(2, 2)"):
+            s9["text"] = "X"
+
+    def humanTakeTurnGUI(self, square):
+        global hasTakenTurn, humanAction
+
+        if(square["text"] == " "):
+            square["text"] = "O"
+            if(str(square) == ".!button"):
+                hasTakenTurn = True
+                humanAction = (0, 0)
+            elif(str(square) == ".!button2"):
+                hasTakenTurn = True
+                humanAction = (0, 1)
+            elif(str(square) == ".!button3"):
+                hasTakenTurn = True
+                humanAction = (0, 2)
+            elif(str(square) == ".!button4"):
+                hasTakenTurn = True
+                humanAction = (1, 0)
+            elif(str(square) == ".!button5"):
+                hasTakenTurn = True
+                humanAction = (1, 1)
+            elif(str(square) == ".!button6"):
+                hasTakenTurn = True
+                humanAction = (1, 2)
+            elif(str(square) == ".!button7"):
+                hasTakenTurn = True
+                humanAction = (2, 0)
+            elif(str(square) == ".!button8"):
+                hasTakenTurn = True
+                humanAction = (2, 1)
+            elif(str(square) == ".!button9"):
+                hasTakenTurn = True
+                humanAction = (2, 2)
+        else:
+            messagebox.showerror("Tic-Tac-Toe", "Square unavailable")
+
+    def highlightBoard(self):
+        # Check to see if player "X" won
+        if(s1["text"] == "X" and s2["text"] == "X" and s3["text"] == "X"):
+            s1.config(bg="gold")
+            s2.config(bg="gold")
+            s3.config(bg="gold")
+        elif(s4["text"] == "X" and s5["text"] == "X" and s6["text"] == "X"):
+            s4.config(bg="gold")
+            s5.config(bg="gold")
+            s6.config(bg="gold")
+        elif(s7["text"] == "X" and s8["text"] == "X" and s9["text"] == "X"):
+            s7.config(bg="gold")
+            s8.config(bg="gold")
+            s9.config(bg="gold")
+        elif(s1["text"] == "X" and s4["text"] == "X" and s7["text"] == "X"):
+            s1.config(bg="gold")
+            s4.config(bg="gold")
+            s7.config(bg="gold")
+        elif(s2["text"] == "X" and s5["text"] == "X" and s8["text"] == "X"):
+            s2.config(bg="gold")
+            s5.config(bg="gold")
+            s8.config(bg="gold")
+        elif(s3["text"] == "X" and s6["text"] == "X" and s9["text"] == "X"):
+            s3.config(bg="gold")
+            s6.config(bg="gold")
+            s9.config(bg="gold")
+        elif(s1["text"] == "X" and s5["text"] == "X" and s9["text"] == "X"):
+            s1.config(bg="gold")
+            s5.config(bg="gold")
+            s9.config(bg="gold")
+        elif(s3["text"] == "X" and s5["text"] == "X" and s7["text"] == "X"):
+            s3.config(bg="gold")
+            s5.config(bg="gold")
+            s7.config(bg="gold")
+
+        # Check to see if player "O" won
+        elif(s1["text"] == "O" and s2["text"] == "O" and s3["text"] == "O"):
+            s1.config(bg="gold")
+            s2.config(bg="gold")
+            s3.config(bg="gold")
+        elif(s4["text"] == "O" and s5["text"] == "O" and s6["text"] == "O"):
+            s4.config(bg="gold")
+            s5.config(bg="gold")
+            s6.config(bg="gold")
+        elif(s7["text"] == "O" and s8["text"] == "O" and s9["text"] == "O"):
+            s7.config(bg="gold")
+            s8.config(bg="gold")
+            s9.config(bg="gold")
+        elif(s1["text"] == "O" and s4["text"] == "O" and s7["text"] == "O"):
+            s1.config(bg="gold")
+            s4.config(bg="gold")
+            s7.config(bg="gold")
+        elif(s2["text"] == "O" and s5["text"] == "O" and s8["text"] == "O"):
+            s2.config(bg="gold")
+            s5.config(bg="gold")
+            s8.config(bg="gold")
+        elif(s3["text"] == "O" and s6["text"] == "O" and s9["text"] == "O"):
+            s3.config(bg="gold")
+            s6.config(bg="gold")
+            s9.config(bg="gold")
+        elif(s1["text"] == "O" and s5["text"] == "O" and s9["text"] == "O"):
+            s1.config(bg="gold")
+            s5.config(bg="gold")
+            s9.config(bg="gold")
+        elif(s3["text"] == "O" and s5["text"] == "O" and s7["text"] == "O"):
+            s3.config(bg="gold")
+            s5.config(bg="gold")
+            s7.config(bg="gold")
+
+    def showBoard(self):
+        global s1, s2, s3, s4, s5, s6, s7, s8, s9
+        global turnToggle, count
+        turnToggle = True
+        count = 0
+        s1 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s1))
+        s2 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s2))
+        s3 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s3))
+        s4 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s4))
+        s5 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s5))
+        s6 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s6))
+        s7 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s7))
+        s8 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s8))
+        s9 = Button(root, text=" ", height=10, width=20,
+                    bg="SystemButtonFace", command=lambda: cs.humanTakeTurnGUI(s9))
+
+        # Plot squares to screen
+        s1.grid(row=0, column=0)
+        s2.grid(row=0, column=1)
+        s3.grid(row=0, column=2)
+        s4.grid(row=1, column=0)
+        s5.grid(row=1, column=1)
+        s6.grid(row=1, column=2)
+        s7.grid(row=2, column=0)
+        s8.grid(row=2, column=1)
+        s9.grid(row=2, column=2)
+
     # playing with human player
     def playWithHuman(self):
+        global hasTakenTurn, humanAction
+        cs.showBoard()
         while not self.isEnd:
             # Player_1
             positions = self.availablePositions()
-            p1_action = self.player1.make_Move(positions, self.board, self.playerSymbol)
+            p1_action = self.player1.make_Move(
+                positions, self.board, self.playerSymbol)
             # take action and update board state
             self.updateState(p1_action)
-            # self.showBoard() --------------------------------Fernando needs to do GUI for this portion
             # check board status if it is end
             print(self.board)
             win = self.winner()
             if win is not None:
                 if win == 1:
+                    cs.highlightBoard()
                     print(self.player1.name, "It's a win!")
+                    messagebox.showinfo(
+                        "Tic-Tac-Toe", "AI wins!")
                 else:
                     print("It's a tie!")
+                    messagebox.showinfo("Tic-Tac-Toe", "Tie!")
                 self.reset()
                 break
 
             else:
                 # Player_2
-                positions = self.availablePositions()
-                p2_action = self.player2.make_Move(positions)
+                print("Waiting for human...")
+                while(True):
+                    root.update()
+                    if(hasTakenTurn == True):
+                        self.updateState(humanAction)
+                        hasTakenTurn = False
+                        humanAction = None
+                        break
 
-                self.updateState(p2_action)
-                # self.showBoard() --------------------------------Fernando needs to do GUI for this portion
+                # USED ONLY FOR COMMAND LINE VERSION OF GAME
+                # positions = self.availablePositions()
+                # p2_action = self.player2.make_Move(positions)
+
+                # self.updateState(p2_action)
+
                 win = self.winner()
                 if win is not None:
                     if win == -1:
+                        cs.highlightBoard()
                         print(self.player2.name, "It's a win!")
+                        messagebox.showinfo(
+                            "Tic-Tac-Toe", "{} wins!".format(self.player2.name,))
                     else:
                         print("It's a tie!")
+                        messagebox.showinfo("Tic-Tac-Toe", "Tie!")
                     self.reset()
                     break
             print()
             print(self.board)
-
-
-from tensorflow.keras import *
-from tensorflow.keras.models import *
-import tensorflow as tf
-from tensorflow.keras.layers import *
-from tensorflow.keras.optimizers import Adam
 
 
 class Player:
@@ -262,9 +453,13 @@ class Player:
             next_board = np.expand_dims(next_board, 0)
             action = np.amax(self.model.predict(next_board), axis=1)
         # Reduce the number of random actions as the model learns more
-        self.epsilon = self.epsilon * self.epsilon_decay if self.epsilon >= self.epsilon_min else self.epsilon_min
+        self.epsilon = self.epsilon * \
+            self.epsilon_decay if self.epsilon >= self.epsilon_min else self.epsilon_min
         self.add_State(current_board)
         self.actions.append(action)
+
+        cs.AIUpdateGUI(action)
+
         return action
 
     def train_model(self):
@@ -277,7 +472,8 @@ class Player:
         targets = []
         index = 0
         for state in state_list:
-            targets.append(self.rewards[index] + self.decay_gamma * np.amax(self.model.predict(state), axis=1))
+            targets.append(
+                self.rewards[index] + self.decay_gamma * np.amax(self.model.predict(state), axis=1))
             index += 1
         targets = np.asarray(targets)
         index = 0
@@ -285,7 +481,7 @@ class Player:
             self.model.fit(state, target)
             if index > 9:
                 break
-            index +=1
+            index += 1
         targets = None
         state_list = None
 
@@ -300,7 +496,8 @@ class Player:
     # at the end of game, backpropagate and update states value
     def feed_Reward(self, reward):
         for st in range(len(self.states)):
-            self.rewards[-st] += self.lr * (self.decay_gamma * reward - self.rewards[-st])
+            self.rewards[-st] += self.lr * \
+                (self.decay_gamma * reward - self.rewards[-st])
             reward = self.rewards[-st]
             # self.rewards.append(reward)
 
