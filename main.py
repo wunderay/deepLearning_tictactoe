@@ -473,7 +473,7 @@ class Player:
         index = 0
         for state in state_list:
             targets.append(
-                self.rewards[index] + self.decay_gamma * np.amax(self.model.predict(state), axis=1))
+                self.rewards[index] + self.decay_gamma * np.argmax(self.model.predict(state), axis=1))
             index += 1
         targets = np.asarray(targets)
         index = 0
@@ -499,7 +499,7 @@ class Player:
             self.rewards[-st] += self.lr * \
                 (self.decay_gamma * reward - self.rewards[-st])
             reward = self.rewards[-st]
-            # self.rewards.append(reward)
+            #self.rewards.append(reward)
 
     def reset(self):
         self.states = []
@@ -556,8 +556,8 @@ if __name__ == "__main__":
     # print("Training the Neural Network...")
     #
     # play1, play2 = cs.train()
-    # play1.save_model("player1_v4")
-    # play2.save_model("player2_v4")
+    # play1.save_model("player1_v5")
+    # play2.save_model("player2_v5")
 
     # Play against a human
     P1 = Player("Computer Player", exp_rate=0)
