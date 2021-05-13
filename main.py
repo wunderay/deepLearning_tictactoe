@@ -134,7 +134,7 @@ class State:
         self.playerSymbol = 1
 
     def train(self):
-        epoch = 50
+        epoch = 100
         for episode in range(epoch):
             print("Epoch {} / {}".format(episode + 1, epoch))
             actions = []
@@ -386,11 +386,11 @@ class State:
 
 
 class Player:
-    def __init__(self, name, exp_rate=0.3):
+    def __init__(self, name, exp_rate=1.0):
         self.name = name
         self.states = []  # array of every position that was taken
         self.lr = 0.2
-        self.epsilon = 1.0
+        self.epsilon = exp_rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.decay_gamma = 0.9
@@ -451,10 +451,13 @@ class Player:
         else:
             next_board = np.expand_dims(current_board, -1)
             next_board = np.expand_dims(next_board, 0)
-            action = np.amax(self.model.predict(next_board), axis=1)
+            action = np.argmax(self.model.predict(next_board), axis=1)
+            action = (int(action / 3), int(action) % 3)
+            if action not in positions: #if network gives occupied square
+                action = positions[np.random.choice(len(positions))]
+
         # Reduce the number of random actions as the model learns more
-        self.epsilon = self.epsilon * \
-            self.epsilon_decay if self.epsilon >= self.epsilon_min else self.epsilon_min
+        self.epsilon = self.epsilon * self.epsilon_decay if self.epsilon >= self.epsilon_min else self.epsilon_min
         self.add_State(current_board)
         self.actions.append(action)
 
@@ -473,7 +476,7 @@ class Player:
         index = 0
         for state in state_list:
             targets.append(
-                self.rewards[index] + self.decay_gamma * np.argmax(self.model.predict(state), axis=1))
+                self.rewards[index] + self.decay_gamma * np.amax(self.model.predict(state), axis=1))
             index += 1
         targets = np.asarray(targets)
         index = 0
@@ -499,7 +502,7 @@ class Player:
             self.rewards[-st] += self.lr * \
                 (self.decay_gamma * reward - self.rewards[-st])
             reward = self.rewards[-st]
-            #self.rewards.append(reward)
+            self.rewards.append(reward)
 
     def reset(self):
         self.states = []
@@ -559,10 +562,10 @@ if __name__ == "__main__":
     # play1.save_model("player1_v5")
     # play2.save_model("player2_v5")
 
-    # Play against a human
+    # # Play against a human
     P1 = Player("Computer Player", exp_rate=0)
 
-    P1.load_model("player1_v4")
+    P1.load_model("player1_v5")
 
     P2 = HumanPlayer("Human")
 
